@@ -183,3 +183,7 @@ def add_review():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+    
+@app.route('/keep-alive', methods=['GET'])
+def keep_alive():
+    return "I'm alive!", 200
