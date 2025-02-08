@@ -180,10 +180,11 @@ def add_review():
     except Exception as e:
         return jsonify({"error": f"Terjadi kesalahan: {str(e)}"}), 500
 
+@app.route('/keep-alive', methods=['GET'])
+def keep_alive():
+    return "I'm alive!", 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
     
-@app.route('/keep-alive', methods=['GET'])
-def keep_alive():
-    return "I'm alive!", 200
