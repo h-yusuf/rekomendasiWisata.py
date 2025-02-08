@@ -4,4 +4,11 @@ version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "flask>=3.1.0",
+    "geopy>=2.4.1",
+    "numpy>=2.2.2",
+    "pandas>=2.2.3",
+    "pyngrok>=7.2.3",
+    "scikit-learn>=1.6.1",
+]
