@@ -28,7 +28,7 @@ def cosine_similarity_manual(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 # Collaborative Filtering (without scikit-learn)
-def collaborative_filtering(user_data, place_id):
+def collaborative_filtering(user_data, place_id, user_id=None):
     try:
         ratings_matrix = user_data.pivot_table(index='user_id', columns='place_id', values='rating').fillna(0)
         similarity_matrix = pd.DataFrame(
@@ -45,13 +45,14 @@ def collaborative_filtering(user_data, place_id):
             return []
 
         similarity_scores = similarity_matrix[place_id].sort_values(ascending=False)
-        return similarity_scores.index.tolist()
+        similarity_scores_above_zero = similarity_scores[similarity_scores > 0]
+        return similarity_scores_above_zero.index.tolist()
     except Exception as e:
         print(f"Error in collaborative_filtering: {e}")
         return []
 
 # Filter valid tourist spots based on user input
-def filter_tourist_spots(data, hidden_gem=True, is_valid=True, current_day=None, spot_type=None, name=None, ratings=None):
+def filter_tourist_spots(data, hidden_gem=True, is_valid=True, current_day=None, spot_type=None, name=None, ratings=None, place_ids=None):
     filtered_data = data.copy()
 
     if name:
@@ -59,7 +60,10 @@ def filter_tourist_spots(data, hidden_gem=True, is_valid=True, current_day=None,
 
     if spot_type and len(spot_type) > 0:
         result_string = '|'.join(spot_type)
-        filtered_data = filtered_data[filtered_data['query'].str.contains(result_string, case=False, na=False)]
+        filtered_data = filtered_data[
+            filtered_data['query'].str.contains(result_string, case=False, na=False) |
+            (filtered_data['place_id_y'].isin(place_ids) if place_ids else False)
+        ]
 
     if ratings:
         filtered_data = filtered_data[(filtered_data['rating'] >= ratings[0]) & (filtered_data['rating'] <= ratings[1])]
@@ -103,11 +107,11 @@ def recommend():
     if not all_places and place_ids:
         combined_array = []
         for place_id in place_ids:
-            similar_places = collaborative_filtering(user_data, place_id)
+            similar_places = collaborative_filtering(user_data, place_id, user_id)
             combined_array.extend(similar_places)
         similar_places = list(set(combined_array))
 
-    filtered_spots = filter_tourist_spots(data, hidden_gem, is_valid, current_day, types, name, ratings)
+    filtered_spots = filter_tourist_spots(data, hidden_gem, is_valid, current_day, types, name, ratings, place_ids)
     recommendations = recommend_tourist_spots(filtered_spots, user_location, similar_places, n_recommendations=100)
     recommendations_df = pd.DataFrame(recommendations)
     recommendations_df['original_index'] = recommendations_df.index
