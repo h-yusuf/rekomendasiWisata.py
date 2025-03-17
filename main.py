@@ -19,10 +19,10 @@ def load_data(file_path):
         print(f"Error loading data: {e}")
         return pd.DataFrame()
 
-file_path = '/content/drive/MyDrive/scrapetable_wisata_cleaned.csv'
+file_path = 'dataset/scrapetable_wisata_cleaned.csv'
 data = load_data(file_path)
 
-file_path_user = '/content/drive/MyDrive/output.csv'
+file_path_user = '/dataset/output.csv'
 user_data = load_data(file_path_user)
 
 # Calculate distance between two geographical points
