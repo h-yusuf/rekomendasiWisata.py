@@ -3,7 +3,9 @@
 from flask import Flask, request, jsonify
 import pandas as pd
 import numpy as np
-from scipy.spatial.distance import euclidean
+# from scipy.spatial.distance import euclidean
+# from scipy.spatial.distance import cosine
+from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime
 import csv
 
@@ -22,34 +24,34 @@ def load_data(file_path):
 file_path = 'dataset/scrapetable_wisata_cleaned.csv'
 data = load_data(file_path)
 
-file_path_user = '/dataset/output.csv'
+file_path_user = 'dataset/output.csv'
 user_data = load_data(file_path_user)
 
 # Calculate distance between two geographical points
-def calculate_distance(user_coords, spot_coords):
-    return euclidean(user_coords, spot_coords) * 111  # Convert degrees to km
+# def calculate_distance(user_coords, spot_coords):
+#     return euclidean(user_coords, spot_coords) * 111  # Convert degrees to km
 
 # Custom Cosine Similarity function
-def cosine_similarity_manual(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+# def cosine_similarity_manual(a, b):
+#     # return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+#    similarity = 1 - cosine(a, b)
+#    return similarity
 
 # Collaborative Filtering (without scikit-learn)
 def collaborative_filtering(user_data, place_id, user_id=None):
     try:
         ratings_matrix = user_data.pivot_table(index='user_id', columns='place_id', values='rating').fillna(0)
         similarity_matrix = pd.DataFrame(
-            np.array([
-                [cosine_similarity_manual(ratings_matrix[col1], ratings_matrix[col2])
-                 for col2 in ratings_matrix.columns]
-                for col1 in ratings_matrix.columns
-            ]),
+            cosine_similarity(ratings_matrix.T),
             index=ratings_matrix.columns,
             columns=ratings_matrix.columns
         )
 
+        # Check if the target_place_id exists in the dataset
         if place_id not in similarity_matrix.columns:
+            print(f"place_id {place_id} not found in similarity matrix")
             return []
-
+        # Get similarity scores for the target place ID
         similarity_scores = similarity_matrix[place_id].sort_values(ascending=False)
         similarity_scores_above_zero = similarity_scores[similarity_scores > 0]
         return similarity_scores_above_zero.index.tolist()
