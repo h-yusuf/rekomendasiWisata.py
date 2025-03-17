@@ -19,6 +19,12 @@ def load_data(file_path):
         print(f"Error loading data: {e}")
         return pd.DataFrame()
 
+file_path = '/content/drive/MyDrive/scrapetable_wisata_cleaned.csv'
+data = load_data(file_path)
+
+file_path_user = '/content/drive/MyDrive/output.csv'
+user_data = load_data(file_path_user)
+
 # Calculate distance between two geographical points
 def calculate_distance(user_coords, spot_coords):
     return euclidean(user_coords, spot_coords) * 111  # Convert degrees to km
@@ -85,6 +91,7 @@ def recommend_tourist_spots(data, user_location, similar_places, n_recommendatio
 @app.route('/recommend', methods=['POST'])
 def recommend():
     print("Received recommendation request")
+    global data, user_data
     user_longitude = request.json.get('longitude')
     user_latitude = request.json.get('latitude')
     hidden_gem = request.json.get('hidden_gem', True)
@@ -98,10 +105,10 @@ def recommend():
     ratings = request.json.get('ratings')
 
     user_location = (user_latitude, user_longitude) if user_latitude and user_longitude else None
-    file_path = 'dataset/scrapetable_wisata_cleaned.csv'
-    data = load_data(file_path)
-    file_path_user = 'dataset/output.csv'
-    user_data = load_data(file_path_user)
+    # file_path = 'dataset/scrapetable_wisata_cleaned.csv'
+    # data = load_data(file_path)
+    # file_path_user = 'dataset/output.csv'
+    # user_data = load_data(file_path_user)
 
     similar_places = []
     if not all_places and place_ids:
